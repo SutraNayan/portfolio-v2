@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nayan | Spatial Storytelling Portfolio (V2)
+
+Welcome to the Elite Tier V2 upgrade of my personal portfolio. This space is engineered for maximum performance, featuring a brutalist, spatial-computing aesthetic with advanced front-end technologies.
+
+## Technology Stack & Architecture
+- **Framework & Edge Integration:** Next.js 16 (Turbopack, Partial Prerendering, Edge Functions).
+- **Motion & Typography:** GSAP 120fps ScrollTriggers powering deep scroll parallax, alongside mathematical CSS fluid typography using `clamp()`.
+- **Spatial Aesthetics:** Spline for high-fidelity 3D modeling and `@react-three/fiber` mapping WebGL distortion shaders to scroll velocity.
+- **Agentic Generative AI:** Custom, zero-dependency `ReadableStream` Edge functions streaming Gemini 1.5 Pro insights with zero lag directly into the DOM.
+
+## Live Deployment
+The portfolio is deployed to Vercel for edge-network latency optimization.
+**You can view the live site here (Vercel):** [nayan-portfolio-v2.vercel.app](https://portfolio-v2-nayan.vercel.app/) *(Pending final deployment URL)*
 
 ## Getting Started
 
-First, run the development server:
-
+First, install the necessary dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Configure your local environment variables in `.env.local`:
+```bash
+GEMINI_API_KEY="your-gemini-api-key"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Then, run the development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
