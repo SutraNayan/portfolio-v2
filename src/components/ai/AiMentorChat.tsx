@@ -3,22 +3,23 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, MessageSquare, Send } from "lucide-react";
-import { askAiMentor } from "@/app/actions";
+
+type Message = { role: "user" | "assistant"; text: string };
 
 export default function AiMentorChat() {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState<{ role: "user" | "ai", text: string }[]>([
-        { role: "ai", text: "Hello! I'm Nayan's AI proxy. Ask me anything about his recent learning journey or skills." }
+    const [messages, setMessages] = useState<Message[]>([
+        { role: "assistant", text: "Hello! I'm Nayan's AI proxy. Ask me anything about his recent architectural upgrades or skills." }
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (chatEndRef.current) {
+        if (chatEndRef.current && isOpen) {
             chatEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [messages, isLoading]);
+    }, [messages, isLoading, isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,14 +27,47 @@ export default function AiMentorChat() {
 
         const userQ = input.trim();
         setInput("");
-        setMessages(prev => [...prev, { role: "user", text: userQ }]);
+
+        // Add user message & empty AI placeholder
+        setMessages(prev => [...prev, { role: "user", text: userQ }, { role: "assistant", text: "" }]);
         setIsLoading(true);
 
         try {
-            const resp = await askAiMentor(userQ);
-            setMessages(prev => [...prev, { role: "ai", text: resp }]);
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messages: [{ role: "user", content: userQ }] })
+            });
+
+            if (!response.body) throw new Error("No response body");
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                // Decode chunk and append
+                const chunk = decoder.decode(value, { stream: true });
+                fullText += chunk;
+
+                // Hide loading indicator as soon as we get the first chunk
+                if (isLoading) setIsLoading(false);
+
+                setMessages(prev => {
+                    const clone = [...prev];
+                    clone[clone.length - 1].text = fullText;
+                    return clone;
+                });
+            }
         } catch (error) {
-            setMessages(prev => [...prev, { role: "ai", text: "Ops, communication failed." }]);
+            setMessages(prev => {
+                const clone = [...prev];
+                clone[clone.length - 1].text = "Ops, communication with the Edge failed.";
+                return clone;
+            });
         } finally {
             setIsLoading(false);
         }
@@ -67,10 +101,11 @@ export default function AiMentorChat() {
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-zinc-950/50">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-full bg-cyan-500/10">
-                                    <MessageSquare className="w-4 h-4 text-cyan-400" />
+                                <div className="p-2 rounded-full bg-cyan-500/10 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-cyan-400/20 animate-pulse blur" />
+                                    <MessageSquare className="w-4 h-4 text-cyan-400 relative z-10" />
                                 </div>
-                                <span className="font-medium text-white tracking-wide text-sm">AI Mentor Proxy</span>
+                                <span className="font-medium text-white tracking-wide text-sm">Edge AI Proxy</span>
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
@@ -82,17 +117,21 @@ export default function AiMentorChat() {
 
                         {/* Chat Area */}
                         <div className="flex-1 overflow-y-auto p-5 pb-24 space-y-4">
-                            {messages.map((msg, i) => (
-                                <div
-                                    key={i}
-                                    className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${msg.role === 'user'
-                                        ? 'bg-cyan-600/20 text-cyan-50 border border-cyan-500/20 rounded-br-sm ml-auto'
-                                        : 'bg-white/5 text-neutral-300 border border-white/5 rounded-bl-sm mr-auto'
-                                        }`}
-                                >
-                                    {msg.text}
-                                </div>
-                            ))}
+                            {messages.map((msg, i) => {
+                                // Don't render empty message bubbles if text is completely empty (while loading)
+                                if (i === messages.length - 1 && isLoading && msg.text === "") return null;
+                                return (
+                                    <div
+                                        key={i}
+                                        className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${msg.role === 'user'
+                                            ? 'bg-cyan-600/20 text-cyan-50 border border-cyan-500/20 rounded-br-sm ml-auto'
+                                            : 'bg-white/5 text-neutral-300 border border-white/5 rounded-bl-sm mr-auto'
+                                            }`}
+                                    >
+                                        {msg.text}
+                                    </div>
+                                );
+                            })}
 
                             {isLoading && (
                                 <div className="bg-white/5 border border-white/5 rounded-2xl rounded-bl-sm p-4 mr-auto w-[60px]">
@@ -114,8 +153,7 @@ export default function AiMentorChat() {
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     placeholder="Ask about Nayan's skills..."
-                                    disabled={isLoading}
-                                    className="w-full bg-black/40 border border-white/10 rounded-full px-5 py-3 pr-12 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/40 transition-all disabled:opacity-50"
+                                    className="w-full bg-black/40 border border-white/10 rounded-full px-5 py-3 pr-12 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/40 transition-all"
                                 />
                                 <button
                                     type="submit"

@@ -1,8 +1,12 @@
 "use client";
 
-import Spline from "@splinetool/react-spline";
+import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+
+const Spline = dynamic(() => import("@splinetool/react-spline"), {
+    ssr: false,
+});
 
 export default function HeroScene() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -47,8 +51,13 @@ export default function HeroScene() {
         >
             {/* Fallback Loader */}
             {!isLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full border-t-2 border-cyan-500 animate-spin" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 z-10 bg-black/50 backdrop-blur-sm">
+                    <div className="relative w-24 h-24">
+                        <div className="absolute inset-0 rounded-full border-t-2 border-cyan-500 animate-[spin_1s_linear_infinite]" />
+                        <div className="absolute inset-2 rounded-full border-b-2 border-purple-500 animate-[spin_1.5s_linear_infinite_reverse]" />
+                        <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-xl animate-pulse" />
+                    </div>
+                    <span className="text-xs font-mono text-cyan-400 tracking-widest uppercase animate-pulse">Initializing WebGL</span>
                 </div>
             )}
 
@@ -77,14 +86,14 @@ export default function HeroScene() {
                     transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className="text-center md:text-left"
                 >
-                    <div className="inline-block px-4 py-1.5 mb-6 rounded-full glass-panel border border-white/10 select-none">
-                        <span className="text-sm font-medium tracking-wider text-cyan-400">STAFF SOFTWARE ENGINEER</span>
+                    <div className="inline-block px-4 py-1.5 mb-6 md:mb-8 rounded-full glass-panel border border-white/10 select-none">
+                        <span className="text-xs md:text-sm font-medium tracking-wider text-cyan-400">STAFF SOFTWARE ENGINEER</span>
                     </div>
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tight text-white mb-6 leading-tight">
+                    <h1 className="text-fluid-hero font-medium tracking-tight text-white mb-6 md:mb-8">
                         Spatial <br />
                         <span className="gradient-text">Storytelling.</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-neutral-400 max-w-lg mx-auto md:mx-0 font-light tracking-wide leading-relaxed">
+                    <p className="text-fluid-p text-neutral-400 max-w-2xl mx-auto md:mx-0 font-light tracking-wide">
                         Exploring the intersection of AI architecture and high-fidelity web experiences.
                     </p>
                 </motion.div>
