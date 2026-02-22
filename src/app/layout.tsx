@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { LenisProvider } from "@/components/providers/LenisProvider";
+import NavBar from "@/components/ui/NavBar";
+import Footer from "@/components/ui/Footer";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -20,9 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geist.variable} font-sans bg-background text-foreground antialiased selection:bg-cyan-500/30 selection:text-white`}>
+      <body className={`${geist.variable} font-sans bg-background text-foreground antialiased selection:bg-cyan-500/30 selection:text-white relative`}>
         <LenisProvider>
+          <NavBar />
           {children}
+          <Footer />
         </LenisProvider>
       </body>
     </html>
